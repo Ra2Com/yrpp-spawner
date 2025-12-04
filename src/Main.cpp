@@ -38,7 +38,8 @@ void Main::ExeRun()
 void Main::CmdLineParse(char** ppArgs, int nNumArgs)
 {
 	Debug::Log("Initialized " PRODUCT_NAME " " PRODUCT_VERSION "\n");
-
+	// Force enable spawn mode.
+	Spawner::Enabled = true;
 	// > 1 because the exe path itself counts as an argument, too!
 	for (int i = 1; i < nNumArgs; ++i)
 	{
@@ -47,10 +48,6 @@ void Main::CmdLineParse(char** ppArgs, int nNumArgs)
 		if (0 == _stricmp(pArg, "-CD"))
 		{
 			Main::Config->NoCD = true;
-		}
-		else if (0 == _stricmp(pArg, "-SPAWN"))
-		{
-			Spawner::Enabled = true;
 		}
 		else if (0 == _stricmp(pArg, "-DumpTypes"))
 		{
