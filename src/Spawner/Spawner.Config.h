@@ -233,7 +233,7 @@ public:
 		, DisableGameSpeed { false }
 		, QuickMatch { false }
 		, SkipScoreScreen { Main::GetConfig()->SkipScoreScreen }
-		, WriteStatistics { false }
+		, WriteStatistics { true }
 		, AINamesByDifficulty { false }
 		, ContinueWithoutHumans { false }
 		, DefeatedBecomesObserver { false }
