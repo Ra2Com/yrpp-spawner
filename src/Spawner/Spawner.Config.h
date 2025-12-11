@@ -174,8 +174,8 @@ public:
 		, LoadSaveGame { false }
 		, SavedGameDir { "Saved Games" }
 		, SaveGameName { "" }
-		, AutoSaveCount { 5 }
-		, AutoSaveInterval { 7200 }
+		, AutoSaveCount { -1 }
+		, AutoSaveInterval { -1 }
 		, NextAutoSaveNumber { 0 }
 
 		// Scenario Options
