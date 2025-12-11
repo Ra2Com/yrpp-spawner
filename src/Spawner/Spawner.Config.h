@@ -20,6 +20,8 @@
 #pragma once
 #include <Main.h>
 
+#define CP_GB2312 936
+
 class CCINIClass;
 
 class SpawnerConfig

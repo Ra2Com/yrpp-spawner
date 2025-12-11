@@ -50,7 +50,7 @@ void SpawnerConfig::LoadFromINIFile(CCINIClass* pINI)
 		SpecialHouseIsAlly = pINI->ReadBool(pSettingsSection, "SpecialHouseIsAlly", SpecialHouseIsAlly);
 
 		if (INIClassExt::ReadString_WithoutAresHook(pINI, pSettingsSection, "UIGameMode", "", Main::readBuffer, sizeof(Main::readBuffer)) > 0)
-			MultiByteToWideChar(CP_ACP, 0, Main::readBuffer, strlen(Main::readBuffer), UIGameMode, std::size(UIGameMode));
+			MultiByteToWideChar(CP_GB2312, 0, Main::readBuffer, strlen(Main::readBuffer), UIGameMode, std::size(UIGameMode));
 	}
 
 	{ // SaveGame Options
@@ -72,7 +72,7 @@ void SpawnerConfig::LoadFromINIFile(CCINIClass* pINI)
 		/* MapHash      */ pINI->ReadString(pSettingsSection, "MapHash", MapHash, MapHash, sizeof(MapHash));
 
 		if (INIClassExt::ReadString_WithoutAresHook(pINI, pSettingsSection, "UIMapName", "", Main::readBuffer, sizeof(Main::readBuffer)) > 0)
-			MultiByteToWideChar(CP_ACP, 0, Main::readBuffer, strlen(Main::readBuffer), UIMapName, std::size(UIMapName));
+			MultiByteToWideChar(CP_GB2312, 0, Main::readBuffer, strlen(Main::readBuffer), UIMapName, std::size(UIMapName));
 	}
 
 	{ // Network Options
@@ -177,7 +177,7 @@ void SpawnerConfig::PlayerConfig::LoadFromINIFile(CCINIClass* pINI, int index)
 		this->Difficulty = -1;
 
 		if (INIClassExt::ReadString_WithoutAresHook(pINI, pSection, "Name", "", Main::readBuffer, sizeof(Main::readBuffer)))
-			MultiByteToWideChar(CP_ACP, 0, Main::readBuffer, -1, this->Name, std::size(this->Name));
+			MultiByteToWideChar(CP_GB2312, 0, Main::readBuffer, -1, this->Name, std::size(this->Name));
 
 		this->Color      = pINI->ReadInteger(pSection, "Color", this->Color);
 		this->Country    = pINI->ReadInteger(pSection, "Side", this->Country);
