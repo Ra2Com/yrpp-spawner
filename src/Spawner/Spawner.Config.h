@@ -168,7 +168,7 @@ public:
 		, FogOfWar { false }
 		, MCVRedeploy { true }
 		, UIGameMode { L"" }
-		, SpecialHouseIsAlly { true }
+		, SpecialHouseIsAlly { false }
 
 		// SaveGame
 		, LoadSaveGame { false }
