@@ -298,6 +298,9 @@ bool Spawner::StartScenario(const char* pScenarioName)
 	}
 
 	Game::InitRandom();
+	// Would dump as TIME in stats.dmp as game result, should initialize in
+	// both single player and multiple player games.
+	Game::Network::PlanetWestwoodStartTime = time(NULL);
 
 	// StartScenario
 	if (SessionClass::IsCampaign())
