@@ -40,39 +40,6 @@ struct GlobalPacket_NetMessage
 };
 #pragma pack(pop)
 
-DEFINE_HOOK(0x48D92B, NetworkCallBack_NetMessage_Print, 0x5)
-{
-	if (!Spawner::Enabled)
-		return 0;
-
-	enum { SkipMessage = 0x48DAD3, PrintMessage = 0x48D937 };
-
-	const int houseIndex = GlobalPacket_NetMessage::Instance.HouseIndex;
-
-	if (houseIndex < 8 && Game::ChatMask[houseIndex])
-	{
-		if (HouseClass::Array.ValidIndex(houseIndex))
-		{
-			HouseClass* pHouse = HouseClass::Array.GetItem(houseIndex);
-
-			GlobalPacket_NetMessage::Instance.Color = (byte)pHouse->ColorSchemeIndex;
-			R->ESI(pHouse->UIName);
-			return PrintMessage;
-		}
-	}
-
-	return SkipMessage;
-}
-
-DEFINE_HOOK(0x48D95B, NetworkCallBack_NetMessage_SetColor, 0x6)
-{
-	if (!Spawner::Enabled)
-		return 0;
-
-	R->EAX(R->ECX());
-	return 0x48D966;
-}
-
 DEFINE_HOOK(0x55EDD2, MessageInput_Write, 0x5)
 {
 	if (!Spawner::Enabled)
