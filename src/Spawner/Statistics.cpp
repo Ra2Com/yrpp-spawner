@@ -59,6 +59,22 @@ DEFINE_HOOK(0x6C856C, SendStatisticsPacket_WriteStatisticsDump, 0x5)
 	return 0;
 }
 
+// RA2 use htons to serialize file size, it's too short for some mod. Suppress
+// ID to make length occupy 4 bytes.
+// Original alignment: 2 bytes len + 2 bytes ID.
+// New alignment: 4 bytes len.
+DEFINE_HOOK(0x625C4B, SendStatisticsPacket_SetDumpSize, 0x5)
+{
+	// Set 4 bytes size.
+	DWORD size = *(R->ESI<LPDWORD>());
+	void* buf = R->EDI<void*>();
+	*reinterpret_cast<uint32_t*>(buf) = htonl(size);
+	// Restore original code.
+	R->EBP(reinterpret_cast<uint8_t*>(buf) + 2);
+	// Skip original htons.
+	return 0x625C69;
+}
+
 // Send AI player
 // Dont send observer
 DEFINE_HOOK(0x6C73F8, SendStatisticsPacket_HouseFilter, 0x6)
@@ -157,104 +173,102 @@ DEFINE_HOOK(0x6C882A, RegisterGameEndTime_CorrectDuration, 0x6)
 	return 0;
 }
 
-// 20251222: Disable send switch, handle on server backend.
+DEFINE_HOOK(0x448524, BuildingClass_Captured_SendStatistics, 0x7)
+{
+	enum { Send = 0x44852D, DontSend = 0x448559 };
 
-// DEFINE_HOOK(0x448524, BuildingClass_Captured_SendStatistics, 0x7)
-// {
-// 	enum { Send = 0x44852D, DontSend = 0x448559 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x55D0FB, AuxLoop_SendStatistics_1, 0x5)
+{
+	enum { Send = 0x55D100, DontSend = 0x55D123 };
 
-// DEFINE_HOOK(0x55D0FB, AuxLoop_SendStatistics_1, 0x5)
-// {
-// 	enum { Send = 0x55D100, DontSend = 0x55D123 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x55D189, AuxLoop_SendStatistics_2, 0x5)
+{
+	enum { Send = 0x55D18E, DontSend = 0x55D1B1 };
 
-// DEFINE_HOOK(0x55D189, AuxLoop_SendStatistics_2, 0x5)
-// {
-// 	enum { Send = 0x55D18E, DontSend = 0x55D1B1 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x64C7FA, ExecuteDoList_SendStatistics_1, 0x6)
+{
+	enum { Send = 0x64C802, DontSend = 0x64C850 };
 
-// DEFINE_HOOK(0x64C7FA, ExecuteDoList_SendStatistics_1, 0x6)
-// {
-// 	enum { Send = 0x64C802, DontSend = 0x64C850 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x64C81E, ExecuteDoList_SendStatistics_2, 0x6)
+{
+	enum { Send = 0x64C826, DontSend = 0x64C850 };
 
-// DEFINE_HOOK(0x64C81E, ExecuteDoList_SendStatistics_2, 0x6)
-// {
-// 	enum { Send = 0x64C826, DontSend = 0x64C850 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x64C84B, ExecuteDoList_SendStatistics_3, 0x5)
+{
+	Game::RegisterGameEndTime();
+	Game::SendStatisticsPacket();
 
-// DEFINE_HOOK(0x64C84B, ExecuteDoList_SendStatistics_3, 0x5)
-// {
-// 	Game::RegisterGameEndTime();
-// 	Game::SendStatisticsPacket();
+	return 0x64C84B + 0x5;
+}
 
-// 	return 0x64C84B + 0x5;
-// }
+DEFINE_HOOK(0x647AE8, QueueAIMultiplayer_SendStatistics_1, 0x7)
+{
+	enum { Send = 0x647AF5, DontSend = 0x6482A6 };
 
-// DEFINE_HOOK(0x647AE8, QueueAIMultiplayer_SendStatistics_1, 0x7)
-// {
-// 	enum { Send = 0x647AF5, DontSend = 0x6482A6 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x64823C, QueueAIMultiplayer_SendStatistics_2, 0x5)
+{
+	Debug::Log(reinterpret_cast<char*>(0x8373BC) /* "Failure executing DoList\n" */);
 
-// DEFINE_HOOK(0x64823C, QueueAIMultiplayer_SendStatistics_2, 0x5)
-// {
-// 	Debug::Log(reinterpret_cast<char*>(0x8373BC) /* "Failure executing DoList\n" */);
+	enum { Send = 0x648257, DontSend = 0x64825C };
 
-// 	enum { Send = 0x648257, DontSend = 0x64825C };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x64827D, QueueAIMultiplayer_SendStatistics_3, 0x6)
+{
+	enum { Send = 0x648285, DontSend = 0x6482A6 };
 
-// DEFINE_HOOK(0x64827D, QueueAIMultiplayer_SendStatistics_3, 0x6)
-// {
-// 	enum { Send = 0x648285, DontSend = 0x6482A6 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x648089, QueueAIMultiplayer_SendStatistics_4, 0x5)
+{
+	enum { Send = 0x64808E, DontSend = 0x648093 };
 
-// DEFINE_HOOK(0x648089, QueueAIMultiplayer_SendStatistics_4, 0x5)
-// {
-// 	enum { Send = 0x64808E, DontSend = 0x648093 };
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
 
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+DEFINE_HOOK(0x64B2E4, KickPlayerNow_SendStatistics, 0x7)
+{
+	enum { Send = 0x64B2ED, DontSend = 0x64B352 };
 
-// DEFINE_HOOK(0x64B2E4, KickPlayerNow_SendStatistics, 0x7)
-// {
-// 	enum { Send = 0x64B2ED, DontSend = 0x64B352 };
-
-// 	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
-// 		? Send
-// 		: DontSend;
-// }
+	return IsStatisticsEnabled() || (SessionClass::Instance.GameMode == GameMode::Internet)
+		? Send
+		: DontSend;
+}
