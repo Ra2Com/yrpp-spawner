@@ -46,7 +46,17 @@ DEFINE_HOOK(0x6C856C, SendStatisticsPacket_WriteStatisticsDump, 0x5)
 		CCFileClass statsFile = CCFileClass("stats.dmp");
 		if (statsFile.Open(FileAccessMode::Write))
 		{
-			statsFile.WriteBytes(buf, lengthOfPacket);
+			// RA2 use htons to serialize file size, it's too short for some mod. Suppress
+			// ID to make length occupy 4 bytes.
+			// Original alignment: 2 bytes len + 2 bytes ID.
+			// New alignment: 2 bytes magic number + 2 bytes version number + 4 bytes len.
+			uint16_t magic_num = 0xFFFF;
+			uint16_t version = 1;
+			statsFile.WriteBytes(&magic_num, 2);
+			statsFile.WriteBytes(&version, 2);
+			statsFile.WriteBytes(&lengthOfPacket, 4);
+			void* buf_without_len = static_cast<void*>(static_cast<char*>(buf) + 4);
+			statsFile.WriteBytes(buf_without_len, lengthOfPacket - 4);
 			statsFile.Close();
 		}
 
@@ -57,22 +67,6 @@ DEFINE_HOOK(0x6C856C, SendStatisticsPacket_WriteStatisticsDump, 0x5)
 	}
 
 	return 0;
-}
-
-// RA2 use htons to serialize file size, it's too short for some mod. Suppress
-// ID to make length occupy 4 bytes.
-// Original alignment: 2 bytes len + 2 bytes ID.
-// New alignment: 4 bytes len.
-DEFINE_HOOK(0x625C4B, SendStatisticsPacket_SetDumpSize, 0x5)
-{
-	// Set 4 bytes size.
-	DWORD size = *(R->ESI<LPDWORD>());
-	void* buf = R->EDI<void*>();
-	*reinterpret_cast<uint32_t*>(buf) = htonl(size);
-	// Restore original code.
-	R->EBP(reinterpret_cast<uint8_t*>(buf) + 2);
-	// Skip original htons.
-	return 0x625C69;
 }
 
 // Send AI player
